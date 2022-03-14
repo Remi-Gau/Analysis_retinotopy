@@ -1,5 +1,5 @@
 function [] = averageRetRegr(subject, baseDir)
-
+    %
     % -- average the sin/cos regr of different runs---
 
     firstLevAna = {'RetPolar_s3_spCorr', 'RetEccen_s3_spCorr'};
@@ -7,12 +7,16 @@ function [] = averageRetRegr(subject, baseDir)
     for iSubj = 5:size(subject, 1)
 
         for iAna = 1:length(firstLevAna)
-            retMapFolder = [baseDir, subject(iSubj).folder, '\fMRI\scans\1stLevel\' firstLevAna{iAna} '\averagedTrigRegr\'];
+            retMapFolder = [baseDir, ...
+                            subject(iSubj).folder, ...
+                            '\fMRI\scans\1stLevel\' firstLevAna{iAna} '\averagedTrigRegr\'];
             if ~exist(retMapFolder)
                 mkdir(retMapFolder);
             end
             % bpath dim1 = run, dim2 = sin/cos regr.
-            firstLevFolder = [baseDir, subject(iSubj).folder, '\fMRI\scans\1stLevel\', firstLevAna{iAna}, '\'];
+            firstLevFolder = [baseDir, ...
+                              subject(iSubj).folder, ...
+                              '\fMRI\scans\1stLevel\', firstLevAna{iAna}, '\'];
             clear SPM directions;
             load([firstLevFolder, 'SPM.mat'], 'SPM');
             % get names of regressors in 1st lev model of subj
@@ -39,7 +43,8 @@ function [] = averageRetRegr(subject, baseDir)
                 betaNo2 = find(strcmp(str_direc2, regrNames));
                 betaNo = [betaNo1'; betaNo2'];
                 noRuns = length(betaNo);
-                directions = [ones(length(betaNo1), 1); ones(length(betaNo2), 1) * 2]; % 1 = clockwise/expanding; 2 = counterclockwise/contracting
+                % 1 = clockwise/expanding; 2 = counterclockwise/contracting
+                directions = [ones(length(betaNo1), 1); ones(length(betaNo2), 1) * 2];
                 [betaNo, sortInd] = sort(betaNo);
                 directions = directions(sortInd);
 
@@ -49,10 +54,14 @@ function [] = averageRetRegr(subject, baseDir)
                 %              directions = directions(1:noSelecRuns,:);
 
                 if isempty(betaNo1) || isempty(betaNo2)
-                    error(['Couldnt find regressors of all runs in first level spm: S' num2str(iSubj) ' Sess' num2str(iSession) 'Run' num2str(iRun)]);
+                    error(['Could not find regressors of all runs in first level spm: ', ...
+                           'S' num2str(iSubj) ' Sess' num2str(iSession) 'Run' num2str(iRun)]);
                 end
                 for iRun = 1:noRuns
-                    bPath{iRun, iTrig} = [firstLevFolder, 'beta_', num2str(betaNo(iRun), '%04d'), '.img'];
+                    bPath{iRun, iTrig} = [firstLevFolder, ...
+                                          'beta_', ...
+                                          num2str(betaNo(iRun), '%04d'), ...
+                                          '.img'];
                 end
             end
             noD1Runs = sum(directions(:, 1) == 1);
@@ -89,7 +98,8 @@ function [] = averageRetRegr(subject, baseDir)
             Y_rems = spm_read_vols(V_rems);
             Y_F_eoi = spm_read_vols(V_F_eoi);
 
-            % --- concatenate cos/sin betas from different runs, imag part of counterclockwise has *-1 (cf. Sam Schwarzkopfs http://www.fil.ion.ucl.ac.uk/~sschwarz/retinotopy_analysis.html)
+            % concatenate cos/sin betas from different runs, imag part of counterclockwise has *-1
+            % (cf. Sam Schwarzkopfs http://www.fil.ion.ucl.ac.uk/~sschwarz/retinotopy_analysis.html)
             Y_sinRuns = zeros([size(Y_d1_sin(:, :, :, 1)), noD1Runs + noD2Runs]);
             Y_cosRuns = Y_sinRuns;
             Y_sinRuns(:, :, :, indD1Runs) = Y_d1_sin;
@@ -113,35 +123,53 @@ function [] = averageRetRegr(subject, baseDir)
             % if wedge starts at 3o'clock = phase = 0 / ring starts at fixation
             % = phase = 0
             Y_phase = mod(atan2(Y_sin, Y_cos) * 180 / pi, 360);
-            %         normFact = 1/((360+exp(1))*log(360+exp(1))- (360+exp(1))) ;
-            %         foV = 39;
-            %         Y_ecc = ((Y_phase+exp(1)) .* log(Y_phase+exp(1)) - (Y_phase+exp(1))) *funcFact * foV;
+            % normFact = 1/((360+exp(1))*log(360+exp(1))- (360+exp(1))) ;
+            % foV = 39;
+            % Y_ecc = ((Y_phase+exp(1)) .* log(Y_phase+exp(1)) - (Y_phase+exp(1))) *funcFact * foV;
 
             if strcmp(firstLevAna{iAna}(1:8), 'RetPolar')
-                Y_sin = -Y_sin; % to express phase as phase of a cosine wave (cf. Schwarzkopf)
+                % to express phase as phase of a cosine wave (cf. Schwarzkopf)
+                Y_sin = -Y_sin;
             elseif strcmp(firstLevAna{iAna}(1:8), 'RetEcc')
-                Y_sin = Y_sin; % Ecc mustnt -1 to match color wheel!
+                % Ecc mustnt -1 to match color wheel!
+                Y_sin = Y_sin;
             end
             Y_ampl = abs(Y_cos + i * Y_sin);
             Y_SNR = Y_ampl ./ Y_rems; % correct? search for references!
             Y_complex = Y_cos + i * Y_sin;
 
             % --- write phase and amplitude volume
-            V_d1_sin(1).fname = [retMapFolder, 'Su' num2str(iSubj) '_', firstLevAna{iAna}(1:8), '_sin_imag.img'];
+            V_d1_sin(1).fname = [retMapFolder, ...
+                                 'Su' num2str(iSubj) '_', ...
+                                 firstLevAna{iAna}(1:8), '_sin_imag.img'];
             spm_write_vol(V_d1_sin(1), Y_sin);
-            V_d1_sin(1).fname = [retMapFolder, 'Su' num2str(iSubj) '_', firstLevAna{iAna}(1:8), '_cos_real.img'];
+            V_d1_sin(1).fname = [retMapFolder, ...
+                                 'Su' num2str(iSubj) '_', ...
+                                 firstLevAna{iAna}(1:8), '_cos_real.img'];
             spm_write_vol(V_d1_sin(1), Y_cos);
-            V_d1_sin(1).fname = [retMapFolder, 'Su' num2str(iSubj) '_', firstLevAna{iAna}(1:8), '_sin_imag_optWeight.img'];
+            V_d1_sin(1).fname = [retMapFolder, ...
+                                 'Su' num2str(iSubj) '_', ...
+                                 firstLevAna{iAna}(1:8), '_sin_imag_optWeight.img'];
             spm_write_vol(V_d1_sin(1), Y_sin_optWeigh);
-            V_d1_sin(1).fname = [retMapFolder, 'Su' num2str(iSubj) '_', firstLevAna{iAna}(1:8), '_cos_real_optWeight.img'];
+            V_d1_sin(1).fname = [retMapFolder, ...
+                                 'Su' num2str(iSubj) '_', ...
+                                 firstLevAna{iAna}(1:8), '_cos_real_optWeight.img'];
             spm_write_vol(V_d1_sin(1), Y_cos_optWeigh);
-            V_d1_sin(1).fname = [retMapFolder, 'Su' num2str(iSubj) '_', firstLevAna{iAna}(1:8), '_phase.img'];
+            V_d1_sin(1).fname = [retMapFolder, ...
+                                 'Su' num2str(iSubj) '_', ...
+                                 firstLevAna{iAna}(1:8), '_phase.img'];
             spm_write_vol(V_d1_sin(1), Y_phase);
-            V_d1_sin(1).fname = [retMapFolder, 'Su' num2str(iSubj) '_', firstLevAna{iAna}(1:8), '_ampl.img'];
+            V_d1_sin(1).fname = [retMapFolder, ...
+                                 'Su' num2str(iSubj) '_', ...
+                                 firstLevAna{iAna}(1:8), '_ampl.img'];
             spm_write_vol(V_d1_sin(1), Y_ampl);
-            V_d1_sin(1).fname = [retMapFolder, 'Su' num2str(iSubj) '_', firstLevAna{iAna}(1:8), '_SNR.img'];
+            V_d1_sin(1).fname = [retMapFolder, ...
+                                 'Su' num2str(iSubj) '_', ...
+                                 firstLevAna{iAna}(1:8), '_SNR.img'];
             spm_write_vol(V_d1_sin(1), Y_SNR);
-            V_d1_sin(1).fname = [retMapFolder, 'Su' num2str(iSubj) '_', firstLevAna{iAna}(1:8), '_complex.img'];
+            V_d1_sin(1).fname = [retMapFolder, ...
+                                 'Su' num2str(iSubj) '_', ...
+                                 firstLevAna{iAna}(1:8), '_complex.img'];
             spm_write_vol(V_d1_sin(1), Y_complex);
 
         end

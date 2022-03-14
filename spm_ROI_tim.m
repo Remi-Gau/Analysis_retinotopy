@@ -1,6 +1,9 @@
 function [xY, XYZmm, j] = spm_ROI_tim(xY, XYZmm, ROI_identifyer)
+    %
     % Region of Interest specification
+    %
     % FORMAT xY = spm_ROI(xY)
+    %
     % xY     - VOI structure
     %    xY.def      - VOI definition [sphere, box, mask, cluster, all]
     %    xY.rej      - cell array of disabled VOI definition options
@@ -9,6 +12,7 @@ function [xY, XYZmm, j] = spm_ROI_tim(xY, XYZmm, ROI_identifyer)
     %    xY.str      - description of the VOI
     %
     % FORMAT [xY, XYZmm, j] = spm_ROI(xY, XYZmm)
+    %
     % XYZmm  - [3xm] locations of voxels {mm}
     %          If an image filename, an spm_vol structure or a NIfTI object is
     %          given instead, XYZmm will be initialised to all voxels within
