@@ -2,6 +2,33 @@
 
 Adapted from the notes from Tim Rohe.
 
+- [README](#readme)
+  - [Starting freesurfer](#starting-freesurfer)
+  - [`recon--all`](#recon--all)
+  - [Checking segmentation errors in volumes](#checking-segmentation-errors-in-volumes)
+  - [Checking segmentation errors in inflated brain](#checking-segmentation-errors-in-inflated-brain)
+  - [Correct skull strip problems](#correct-skull-strip-problems)
+  - [Correction of segmentation errors](#correction-of-segmentation-errors)
+  - [Register functional to anatomical surface](#register-functional-to-anatomical-surface)
+  - [Compute flattended patch](#compute-flattended-patch)
+  - [Load flattened patch](#load-flattened-patch)
+  - [Load flattened patch with overlays](#load-flattened-patch-with-overlays)
+    - [Polar](#polar)
+      - [lh](#lh)
+      - [rh](#rh)
+    - [Eccentriciy](#eccentriciy)
+      - [lh](#lh-1)
+      - [rh](#rh-1)
+  - [Combine labels](#combine-labels)
+  - [Convert label to ROI vol in space of main data](#convert-label-to-roi-vol-in-space-of-main-data)
+    - [lh](#lh-2)
+    - [rh](#rh-2)
+  - [Subcortical segmentation to ROI](#subcortical-segmentation-to-roi)
+  - [Create labels from annotation file created by Fressurfer parcellation](#create-labels-from-annotation-file-created-by-fressurfer-parcellation)
+  - [Convert bshort to analyze format](#convert-bshort-to-analyze-format)
+  - [Overlay main exp data](#overlay-main-exp-data)
+    - [lh](#lh-3)
+
 ## Starting freesurfer
 
 ```bash
@@ -16,7 +43,7 @@ setenv  SUBJECTS_DIR ${path_to_data}
 
 anatomical must be coregistered to functional data before reconstruction!
 
-## recon--all
+## `recon--all`
 
 ```bash
 subject=${subject}
@@ -72,7 +99,7 @@ tksurfer ${subject} lh pial
 tksurfer ${subject} lh inflated
 ```
 
-## register functional to anatomical surface
+## Register functional to anatomical surface
 
 ```bash
 tkregister2 --mov ${path_to_data}/${subject}/glm_retinotopy/RetPolar_cos_real.img \
@@ -80,7 +107,7 @@ tkregister2 --mov ${path_to_data}/${subject}/glm_retinotopy/RetPolar_cos_real.im
     --reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
 ```
 
-## compute flattended patch
+## Compute flattended patch
 
 ```bash
 mris_flatten -w 10 \
@@ -92,14 +119,14 @@ mris_flatten -w 10 \
     ${path_to_data}/${subject}/surf/rh.occip.flat.patch.3d
 ```
 
-## load flattened patch
+## Load flattened patch
 
 ```bash
 tksurfer ${subject} lh inflated -patch lh.occip.flat.patch.3d
 tksurfer ${subject} rh inflated -patch rh.occip.flat.patch.3d
 ```
 
-## load flattened patch with overlays
+## Load flattened patch with overlays
 
 ### Polar
 
@@ -145,7 +172,7 @@ tksurfer ${subject} rh inflated -curv rh.curv -patch rh.occip.flat.patch.3d \
     -overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
 ```
 
-## combine labels
+## Combine labels
 
 ```bash
 mri_mergelabels -i ${path_to_data}/${subject}/label/lh_V1.label \
@@ -153,7 +180,7 @@ mri_mergelabels -i ${path_to_data}/${subject}/label/lh_V1.label \
                 -o ${path_to_data}/${subject}/label/lh_V1_e.label
 ```
 
-## convert label to ROI vol in space of main data
+## Convert label to ROI vol in space of main data
 
 which is later read out from ROIs
 
@@ -263,7 +290,7 @@ mri_annotation2label --subject ${subject}  \
     --outdir ${path_to_data}/${subject}/label
 ```
 
-# convert bshort to analyze format
+## Convert bshort to analyze format
 
 ```bash
 mri_convert ${path_to_data}/${subject}/ROI/VC_lh_RetSequ.bshort.bhdr \
@@ -277,82 +304,82 @@ mri_convert -it bshort -ot nii \
     ${path_to_data}/${subject}/ROI/VC_lh_BA1.nii
 ```
 
-## overlay main exp data
+## Overlay main exp data
 
-# lh
+### lh
 
 ```bash
-tksurfer ${subject} lh inflated -patch lh.occip.flat.patch.3d 
--overlay ${path_to_data}/${subject}/glm_retinotopy/con_0025.img
--overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
--overlay ${path_to_data}/${subject}/glm_retinotopy/con_0026.img
--overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
--overlay ${path_to_data}/${subject}/glm_retinotopy/con_0027.img
--overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
--overlay ${path_to_data}/${subject}/glm_retinotopy/con_0028.img
--overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
--overlay ${path_to_data}/${subject}/glm_retinotopy/con_0029.img
--overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
--overlay ${path_to_data}/${subject}/glm_retinotopy/con_0030.img
--overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
--overlay ${path_to_data}/${subject}/glm_retinotopy/con_0031.img
--overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
--overlay ${path_to_data}/${subject}/glm_retinotopy/con_0032.img
--overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
--overlay ${path_to_data}/${subject}/glm_retinotopy/con_0033.img
--overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
--overlay ${path_to_data}/${subject}/glm_retinotopy/con_0034.img
--overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
--overlay ${path_to_data}/${subject}/glm_retinotopy/con_0035.img
--overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
--overlay ${path_to_data}/${subject}/glm_retinotopy/con_0036.img
--overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
--overlay ${path_to_data}/${subject}/glm_retinotopy/con_0037.img
--overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
--overlay ${path_to_data}/${subject}/glm_retinotopy/con_0038.img
--overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
--overlay ${path_to_data}/${subject}/glm_retinotopy/con_0039.img
--overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
--overlay ${path_to_data}/${subject}/glm_retinotopy/con_0040.img
--overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
--overlay ${path_to_data}/${subject}/glm_retinotopy/con_0041.img
--overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
--overlay ${path_to_data}/${subject}/glm_retinotopy/con_0042.img
--overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
--overlay ${path_to_data}/${subject}/glm_retinotopy/con_0043.img
--overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
--overlay ${path_to_data}/${subject}/glm_retinotopy/con_0044.img
--overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
--overlay ${path_to_data}/${subject}/glm_retinotopy/con_0045.img
--overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
--overlay ${path_to_data}/${subject}/glm_retinotopy/con_0046.img
--overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
--overlay ${path_to_data}/${subject}/glm_retinotopy/con_0047.img
--overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
--overlay ${path_to_data}/${subject}/glm_retinotopy/con_0048.img
--overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
--overlay ${path_to_data}/${subject}/glm_retinotopy/con_0049.img
--overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
--overlay ${path_to_data}/${subject}/glm_retinotopy/con_0050.img
--overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
--overlay ${path_to_data}/${subject}/glm_retinotopy/con_0051.img
--overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
--overlay ${path_to_data}/${subject}/glm_retinotopy/con_0052.img
--overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
--overlay ${path_to_data}/${subject}/glm_retinotopy/con_0053.img
--overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
--overlay ${path_to_data}/${subject}/glm_retinotopy/con_0054.img
--overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
--overlay ${path_to_data}/${subject}/glm_retinotopy/con_0055.img
--overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
--overlay ${path_to_data}/${subject}/glm_retinotopy/con_0056.img
--overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
--labels-under ${path_to_data}/${subject}/labels/lh_V1_e.label 
--labels-under ${path_to_data}/${subject}/labels/lh_V2_e.label 
--labels-under ${path_to_data}/${subject}/labels/lh_V1_3.label 
--labels-under ${path_to_data}/${subject}/labels/lh_V3AB.label 
--labels-under ${path_to_data}/${subject}/labels/lh_hV4.label 
--labels-under ${path_to_data}/${subject}/labels/lh_LO.label 
--labels-under ${path_to_data}/${subject}/labels/lh_hMT+.label 
--labels-under ${path_to_data}/${subject}/labels/lh_IPS.label
+tksurfer ${subject} lh inflated -patch lh.occip.flat.patch.3d
+    -overlay ${path_to_data}/${subject}/glm_retinotopy/con_0025.img
+    -overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
+    -overlay ${path_to_data}/${subject}/glm_retinotopy/con_0026.img
+    -overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
+    -overlay ${path_to_data}/${subject}/glm_retinotopy/con_0027.img
+    -overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
+    -overlay ${path_to_data}/${subject}/glm_retinotopy/con_0028.img
+    -overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
+    -overlay ${path_to_data}/${subject}/glm_retinotopy/con_0029.img
+    -overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
+    -overlay ${path_to_data}/${subject}/glm_retinotopy/con_0030.img
+    -overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
+    -overlay ${path_to_data}/${subject}/glm_retinotopy/con_0031.img
+    -overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
+    -overlay ${path_to_data}/${subject}/glm_retinotopy/con_0032.img
+    -overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
+    -overlay ${path_to_data}/${subject}/glm_retinotopy/con_0033.img
+    -overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
+    -overlay ${path_to_data}/${subject}/glm_retinotopy/con_0034.img
+    -overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
+    -overlay ${path_to_data}/${subject}/glm_retinotopy/con_0035.img
+    -overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
+    -overlay ${path_to_data}/${subject}/glm_retinotopy/con_0036.img
+    -overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
+    -overlay ${path_to_data}/${subject}/glm_retinotopy/con_0037.img
+    -overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
+    -overlay ${path_to_data}/${subject}/glm_retinotopy/con_0038.img
+    -overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
+    -overlay ${path_to_data}/${subject}/glm_retinotopy/con_0039.img
+    -overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
+    -overlay ${path_to_data}/${subject}/glm_retinotopy/con_0040.img
+    -overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
+    -overlay ${path_to_data}/${subject}/glm_retinotopy/con_0041.img
+    -overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
+    -overlay ${path_to_data}/${subject}/glm_retinotopy/con_0042.img
+    -overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
+    -overlay ${path_to_data}/${subject}/glm_retinotopy/con_0043.img
+    -overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
+    -overlay ${path_to_data}/${subject}/glm_retinotopy/con_0044.img
+    -overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
+    -overlay ${path_to_data}/${subject}/glm_retinotopy/con_0045.img
+    -overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
+    -overlay ${path_to_data}/${subject}/glm_retinotopy/con_0046.img
+    -overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
+    -overlay ${path_to_data}/${subject}/glm_retinotopy/con_0047.img
+    -overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
+    -overlay ${path_to_data}/${subject}/glm_retinotopy/con_0048.img
+    -overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
+    -overlay ${path_to_data}/${subject}/glm_retinotopy/con_0049.img
+    -overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
+    -overlay ${path_to_data}/${subject}/glm_retinotopy/con_0050.img
+    -overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
+    -overlay ${path_to_data}/${subject}/glm_retinotopy/con_0051.img
+    -overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
+    -overlay ${path_to_data}/${subject}/glm_retinotopy/con_0052.img
+    -overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
+    -overlay ${path_to_data}/${subject}/glm_retinotopy/con_0053.img
+    -overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
+    -overlay ${path_to_data}/${subject}/glm_retinotopy/con_0054.img
+    -overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
+    -overlay ${path_to_data}/${subject}/glm_retinotopy/con_0055.img
+    -overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
+    -overlay ${path_to_data}/${subject}/glm_retinotopy/con_0056.img
+    -overlay-reg ${path_to_data}/${subject}/glm_retinotopy/${subject}_register.dat
+    -labels-under ${path_to_data}/${subject}/labels/lh_V1_e.label
+    -labels-under ${path_to_data}/${subject}/labels/lh_V2_e.label
+    -labels-under ${path_to_data}/${subject}/labels/lh_V1_3.label
+    -labels-under ${path_to_data}/${subject}/labels/lh_V3AB.label
+    -labels-under ${path_to_data}/${subject}/labels/lh_hV4.label
+    -labels-under ${path_to_data}/${subject}/labels/lh_LO.label
+    -labels-under ${path_to_data}/${subject}/labels/lh_hMT+.label
+    -labels-under ${path_to_data}/${subject}/labels/lh_IPS.label
 ```
